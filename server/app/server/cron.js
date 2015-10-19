@@ -6,6 +6,16 @@ var CRON = require('cron').CronJob;
 
 var init = function(){
   info('Starting CRONManager ...');
+  
+  process.on('SIGINT', function() {
+	  CRONManager.stop();
+	  process.exit(0);
+  }
+  
+  process.on('uncaughtException', function() {
+	  CRONManager.stop();
+  }
+  
   return CRONManager;
 }
 
@@ -19,6 +29,15 @@ var start = function(){
     if (!plugin.cron) continue;
     job(plugin);
   }
+}
+
+function stop(){
+  var plugins = SARAH.PluginManager.getList();
+  for (var i = 0 ; i < plugins.length ; i++){
+    var plugin = plugins[i]; 
+    if (!plugin.cronJob) continue;
+	info("Stoping cron job %s", plugin.name);
+	plugin.cronJob.stop();
 }
 
 var job = function(plugin) {
