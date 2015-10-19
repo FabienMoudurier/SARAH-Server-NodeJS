@@ -1,3 +1,5 @@
+'use strict';
+
 var CRON = require('cron').CronJob;
 
 // ------------------------------------------
@@ -10,14 +12,14 @@ var init = function(){
   process.on('SIGINT', function() {
 	  CRONManager.stop();
 	  process.exit(0);
-  }
+  });
   
   process.on('uncaughtException', function() {
 	  CRONManager.stop();
-  }
+  });
   
   return CRONManager;
-}
+};
 
 /**
  * Starting all jobs from properties
@@ -26,18 +28,23 @@ var start = function(){
   var plugins = SARAH.PluginManager.getList();
   for (var i = 0 ; i < plugins.length ; i++){
     var plugin = plugins[i]; 
-    if (!plugin.cron) continue;
+    if (!plugin.cron) {
+      continue;
+    }
     job(plugin);
   }
-}
+};
 
-function stop(){
+function stop() {
   var plugins = SARAH.PluginManager.getList();
-  for (var i = 0 ; i < plugins.length ; i++){
-    var plugin = plugins[i]; 
-    if (!plugin.cronJob) continue;
-	info("Stoping cron job %s", plugin.name);
-	plugin.cronJob.stop();
+  for (var i = 0; i < plugins.length; i++) {
+    var plugin = plugins[i];
+    if (!plugin.cronJob) {
+      continue;
+    }
+    info("Stoping cron job %s", plugin.name);
+    plugin.cronJob.stop();
+  }
 }
 
 var job = function(plugin) {
@@ -53,7 +60,7 @@ var job = function(plugin) {
     if (tts){ SARAH.speak(tts); }
     
     SARAH.RuleEngine.dispatch(plugin.name, data);
-  }
+  };
   
   // Create job
   var job = new CRON({
@@ -67,7 +74,7 @@ var job = function(plugin) {
   
   // Run once
   plugin.getInstance().cron(next, plugin.cron, SARAH);
-}
+};
 
 // ------------------------------------------
 //  PUBLIC
@@ -75,8 +82,9 @@ var job = function(plugin) {
 
 var CRONManager = {
   'init' : init,
-  'start': start
-}
+  'start': start,
+  'stop' : stop
+};
 
 // Exports Manager
 exports.init = CRONManager.init;
